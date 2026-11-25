@@ -16,8 +16,37 @@ LINE = (
 
 DEFAULT_OUTPUT = "/output/entry.txt"
 
+# Competition rules: the sealed scorer accepts only a single line of
+# 1-159 UTF-8 characters (whitespace-only is not a valid line).
+MAX_LINE_LENGTH = 159
+
+
+def validate_line(line):
+    """Check the line against the scorer's acceptance rules.
+
+    Returns None when the line is valid, otherwise a human-readable
+    reason for rejection.
+    """
+    if not line:
+        return "line is empty"
+    if line.strip() == "":
+        return "line is whitespace-only"
+    if "\n" in line or "\r" in line:
+        return "line must be a single line (no newline characters)"
+    if len(line) > MAX_LINE_LENGTH:
+        return (
+            "line is %d characters, exceeding the %d-character limit"
+            % (len(line), MAX_LINE_LENGTH)
+        )
+    return None
+
 
 def main(argv):
+    problem = validate_line(LINE)
+    if problem is not None:
+        sys.stderr.write("invalid apology line: %s\n" % problem)
+        return 1
+
     output_path = argv[1] if len(argv) > 1 else DEFAULT_OUTPUT
     data = LINE.encode("utf-8")
 
